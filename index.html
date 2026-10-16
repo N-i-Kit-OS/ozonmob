@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ozon — редизайн (прототип)</title>
+<style>
+/* ============ БАЗА ============ */
+:root{
+  --blue:#005BFF; --blue-dark:#0048CC; --blue-soft:#E7EEFF;
+  --bg:#F3F4F8; --card:#fff;
+  --text:#001A34; --gray:#8D939C; --line:#ECEEF2;
+  --green:#0A9945; --red:#F91155;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+s{text-decoration:line-through}
+body{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(1200px 800px at 50% 20%,#23262e,#0f1013);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;
+  padding:10px;color:var(--text);
+}
+.holder{position:relative}
+.phone{
+  position:absolute;top:0;left:0;width:402px;height:874px;background:#fff;
+  border-radius:55px;overflow:hidden;transform-origin:top left;user-select:none;
+  box-shadow:0 0 0 11px #17181c,0 0 0 13px #46484f,0 40px 90px rgba(0,0,0,.6);
+}
+
+/* ============ СТАТУС-БАР (iOS) ============ */
+.statusbar{
+  position:absolute;top:0;left:0;right:0;height:59px;background:#fff;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;padding:12px 34px 0;
+}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#000}
+.sb-time{font-size:16px;font-weight:600;letter-spacing:.2px}
+.sb-icons{display:flex;gap:6px;align-items:center;color:#000}
+
+/* ============ КОНТЕЙНЕР ЭКРАНОВ ============ */
+.app{position:absolute;top:59px;bottom:84px;left:0;right:0;background:var(--bg)}
+.screen{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;display:none;padding-bottom:24px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{display:block}
+.fill{min-height:100%;display:flex;flex-direction:column}
+
+/* ============ ТАБ-БАР: 5 КНОПОК (было 6) ============ */
+.tabbar{position:absolute;bottom:0;left:0;right:0;height:84px;background:#fff;border-top:1px solid var(--line);display:flex;padding:7px 6px 0;z-index:45}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E939C;position:relative;padding-top:4px}
+.tab svg{width:25px;height:25px}
+.tab span{font-size:10px;font-weight:500}
+.tab.active{color:var(--blue)}
+.tab .badge{position:absolute;top:2px;left:calc(50% + 7px);background:var(--red);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid #fff}
+.tabbar::after{content:'';position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:140px;height:5px;border-radius:3px;background:#000}
+
+/* ============ ОБЩИЕ ЭЛЕМЕНТЫ ============ */
+.card{background:var(--card);border-radius:18px;margin:10px 12px;padding:14px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;width:100%}
+.card-title{font-size:18px;font-weight:800;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
+.link{color:var(--blue);font-size:14px;font-weight:600;display:flex;align-items:center;gap:2px}
+.link .chev{color:var(--blue)}
+.chev{color:#B9BDC4;font-weight:600;font-size:20px;line-height:1}
+.icon-btn{position:relative;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.icon-btn svg{width:24px;height:24px;fill:none;stroke:var(--text);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.dot-badge{position:absolute;top:0;right:0;background:var(--red);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.coin{width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.balance{display:flex;align-items:center;gap:5px;font-weight:700;font-size:14px}
+.btn-primary{width:100%;background:var(--blue);color:#fff;font-size:15px;font-weight:700;border-radius:14px;padding:14px;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
+.btn-primary:active{transform:scale(.98);background:var(--blue-dark)}
+.osub{font-size:12.5px;color:var(--gray);line-height:1.35}
+.chip{display:inline-block;color:#fff;font-size:13px;font-weight:600;border-radius:8px;padding:5px 10px}
+.chip-green{background:var(--green)}
+.chip-blue{background:var(--blue)}
+.count-chip{background:var(--blue);color:#fff;font-size:12px;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+
+/* ============ ГЛАВНАЯ ============ */
+.home-head{position:sticky;top:0;z-index:10;background:#fff;padding:8px 16px 12px}
+.addr-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.addr{font-size:16px;font-weight:700;display:flex;align-items:center;gap:3px}
+.addr-right{display:flex;gap:10px;align-items:center}
+.search{display:flex;align-items:center;gap:8px;background:#EBEDF1;border-radius:14px;padding:0 12px;height:44px;color:var(--gray);width:100%}
+.search .ph{flex:1;font-size:15px}
+.search svg{width:20px;height:20px;fill:none;stroke:var(--gray);stroke-width:1.7;stroke-linecap:round}
+
+.hscroll{display:flex;gap:14px;overflow-x:auto;padding:14px 16px 6px;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.srv{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;width:66px;font-size:11px;color:var(--text);line-height:1.15;text-align:center;font-weight:500}
+.srv-ic{width:54px;height:54px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:800}
+
+/* РЕШЕНИЕ №3: заказы — вертикальная карточка, «Все заказы» видно сразу */
+.order-row{display:flex;align-items:center;gap:12px;width:100%;padding:11px 0;border-bottom:1px solid var(--line)}
+.order-row:last-child{border-bottom:0;padding-bottom:3px}
+.othumb{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+.ocol{flex:1;display:flex;flex-direction:column;gap:2px}
+.ostatus{font-size:15px;font-weight:700}
+
+/* РЕШЕНИЕ №2: компактная реклама вместо огромного баннера */
+.ad-mini{display:flex;align-items:center;gap:12px;margin:10px 12px;padding:10px 14px;border-radius:16px;width:calc(100% - 24px);background:linear-gradient(100deg,#26282E,#4A4E5A 55%,#8B7BB8);color:#fff}
+.ad-logo{font-weight:800;letter-spacing:3px;font-size:13px;border:1px solid rgba(255,255,255,.5);padding:6px 9px;border-radius:8px;flex:0 0 auto}
+.ad-text{flex:1;font-size:13px;line-height:1.3}
+.ad-tag{font-size:9px;color:rgba(255,255,255,.7);align-self:flex-start}
+
+.section-row{display:flex;justify-content:space-between;align-items:center;margin:16px 16px 2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px 0}
+.pcard{background:#fff;border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.pimg{height:150px;position:relative;display:flex;align-items:center;justify-content:center;font-size:56px}
+.pemoji{filter:drop-shadow(0 6px 10px rgba(0,0,0,.15))}
+.heart{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.heart svg{width:17px;height:17px;fill:none;stroke:var(--text);stroke-width:1.8}
+.heart.on svg{fill:var(--red);stroke:var(--red)}
+.pbody{padding:8px 10px 12px;display:flex;flex-direction:column;gap:4px}
+.price{font-size:16px;font-weight:800}
+.price s{color:#B0B4BA;font-weight:500;font-size:12px;margin-left:4px}
+.ptitle{font-size:12.5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prate{font-size:11px;color:var(--gray)}
+
+/* ============ ПРОФИЛЬ ============ */
+.prof-head{display:flex;align-items:center;gap:12px;padding:14px 16px 6px}
+.avatar{width:50px;height:50px;border-radius:50%;background:#E8EAF0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex:0 0 auto}
+.prof-name{flex:1;display:flex;flex-direction:column;gap:2px}
+.prof-name b{font-size:18px}
+.prof-name span{font-size:12.5px;color:var(--gray)}
+.quick-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px}
+.quick{background:#fff;border-radius:16px;padding:12px 12px 10px;display:flex;flex-direction:column;gap:6px}
+.quick svg{width:22px;height:22px;fill:none;stroke:var(--text);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.quick b{font-size:13.5px}
+.quick span{font-size:11px;color:var(--gray)}
+.fin-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:8px;margin-top:10px}
+.fin-col{display:flex;flex-direction:column;gap:8px}
+.fin-row{background:#F1F2F6;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.fin-row span{font-size:12.5px;color:var(--gray)}
+.fin-row b{font-size:14.5px}
+.fin-promo{background:linear-gradient(135deg,#EAF1FF,#DCE8FF);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.fin-promo b{font-size:14.5px}
+.fin-promo span{font-size:11.5px;color:#4569B8}
+.seen-thumb{flex:0 0 auto;width:112px;height:112px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:44px}
+
+/* ============ ЭКРАН ВОЗВРАТОВ ============ */
+.page-head{position:sticky;top:0;z-index:10;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:8px 12px}
+.page-title{font-size:18px;font-weight:800}
+.round-btn{width:38px;height:38px;border-radius:50%;background:#F1F2F6;display:flex;align-items:center;justify-content:center;color:var(--text)}
+.round-btn.back{font-size:26px;padding-bottom:4px}
+.round-btn.q{font-size:17px;font-weight:700;color:var(--gray)}
+.return-card{background:#fff;border-radius:18px;margin:10px 12px;padding:14px}
+.rc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.rc-head b{font-size:18px}
+.return-card p{font-size:14px;line-height:1.45;color:#3A414B;margin:10px 0}
+.return-card a{color:var(--blue)}
+.rthumb{width:64px;height:64px;border-radius:10px;background:#F1F2F6;display:flex;align-items:center;justify-content:center;font-size:30px}
+.rc-sum{display:flex;justify-content:space-between;font-size:15px;margin-top:10px}
+.rc-sum b{font-weight:800}
+.create-bar{position:sticky;bottom:0;margin-top:auto;padding:10px 12px 14px;background:linear-gradient(180deg,rgba(243,244,248,0),var(--bg) 45%)}
+
+/* ============ ЗАГЛУШКИ ТАБОВ ============ */
+.stub{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--gray);text-align:center;padding:0 40px}
+.stub svg{width:56px;height:56px;fill:none;stroke:#B9BDC4;stroke-width:1.5}
+.stub .big{font-size:54px}
+.stub b{font-size:18px;color:var(--text)}
+.stub span{font-size:13px;line-height:1.4}
+.stub .btn-primary{margin-top:10px;padding:12px 22px;width:auto}
+.chip-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:6px}
+.chip-tag{background:#fff;border-radius:12px;padding:8px 12px;font-size:13px;color:var(--text)}
+
+/* ============ ШИРМА / ТОСТ ============ */
+.backdrop{position:absolute;inset:0;background:rgba(0,10,30,.45);opacity:0;pointer-events:none;transition:.25s;z-index:50}
+.backdrop.show{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:10px 16px 20px;transform:translateY(105%);transition:.3s cubic-bezier(.2,.8,.2,1);z-index:55}
+.sheet.open{transform:none}
+.sheet-grab{width:40px;height:4px;border-radius:2px;background:#D9DCE1;margin:0 auto 10px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center}
+.sheet-head b{font-size:18px}
+.x-btn{width:30px;height:30px;border-radius:50%;background:#F1F2F6;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--gray)}
+.sheet-sub{font-size:13px;color:var(--gray);margin:4px 0 10px}
+.pick{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;margin-bottom:6px;cursor:pointer}
+.pick:has(input:checked){background:#EEF4FF}
+.pick input{display:none}
+.rmark{width:20px;height:20px;border:2px solid #C7CBD1;border-radius:50%;flex:0 0 auto;position:relative}
+.pick input:checked + .rmark{border-color:var(--blue)}
+.pick input:checked + .rmark::after{content:'';position:absolute;inset:3px;background:var(--blue);border-radius:50%}
+.pthmb{width:44px;height:44px;border-radius:10px;background:#F1F2F6;display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+.pcol{flex:1;display:flex;flex-direction:column;gap:2px}
+.pcol b{font-size:14px}
+.pcol small{font-size:12px;color:var(--gray)}
+.toast{position:absolute;left:50%;bottom:104px;transform:translate(-50%,8px);background:rgba(0,26,52,.92);color:#fff;font-size:13px;font-weight:500;padding:10px 16px;border-radius:12px;opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:330px;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="holder" id="holder">
+<div class="phone" id="phone">
+
+  <!-- СТАТУС-БАР -->
+  <div class="statusbar">
+    <div class="sb-time">17:47</div>
+    <div class="island"></div>
+    <div class="sb-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="17" height="13" viewBox="0 0 17 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.5a11 11 0 0 1 14 0"/><path d="M4.3 7.5a7 7 0 0 1 8.4 0"/><circle cx="8.5" cy="10.6" r="1.5" fill="currentColor" stroke="none"/></svg>
+      <svg width="28" height="13" viewBox="0 0 28 13"><rect x="0.5" y="0.5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2" fill="#34C759"/><text x="12" y="9.6" font-size="7.5" font-weight="700" fill="#fff" text-anchor="middle" font-family="Arial">54</text><path d="M25.3 4.3v4.4c1.3-.3 2-1.2 2-2.2s-.7-1.9-2-2.2z" fill="currentColor" opacity=".4"/></svg>
+    </div>
+  </div>
+
+  <div class="app">
+
+    <!-- ================= ГЛАВНАЯ ================= -->
+    <section class="screen active" id="screen-home">
+      <div class="home-head">
+        <div class="addr-row">
+          <button class="addr" onclick="toast('Выбор пункта выдачи — демо')">Пункт Ozon: ул. Щорса, 53 <span class="chev">⌄</span></button>
+          <div class="addr-right">
+            <button class="balance" onclick="toast('Ozon Счёт: 400 ₽ — демо')"><span class="coin">O</span>400</button>
+            <button class="icon-btn" onclick="toast('Сообщения — демо')">
+              <svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 3.5V16H6.5A2.5 2.5 0 0 1 4 13.5z"/></svg>
+              <span class="dot-badge">10</span>
+            </button>
+          </div>
+        </div>
+        <button class="search" onclick="go('search')">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/></svg>
+          <span class="ph">Искать на Ozon</span>
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h3v3h-3zM20 14v6h-6"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.5-2h5L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.2"/></svg>
+        </button>
+      </div>
+
+      <!-- Сервисы: Ozon Банк остаётся здесь + целиком в «Финансах» профиля -->
+      <div class="hscroll">
+        <button class="srv" onclick="toast('Каталог — демо')"><span class="srv-ic" style="background:linear-gradient(180deg,#6FB1FF,#0A5CFF)">▦</span>Каталог Ozon</button>
+        <button class="srv" onclick="toast('Ozon Банк переехал в «Финансы» — экран профиля')"><span class="srv-ic" style="background:linear-gradient(180deg,#4FA0FF,#0050E0)">₽</span>Ozon Банк</button>
+        <button class="srv" onclick="toast('Билеты и отели — демо')"><span class="srv-ic" style="background:linear-gradient(180deg,#FF7A59,#E63946)">✈️</span>Билеты и&nbsp;отели</button>
+        <button class="srv" onclick="toast('Ozon Доставка — демо')"><span class="srv-ic" style="background:linear-gradient(180deg,#33C2FF,#0064FA)">📦</span>Ozon Доставка</button>
+        <button class="srv" onclick="toast('Ozon Селект — демо')"><span class="srv-ic" style="background:#111114">C</span>Ozon Селект</button>
+        <button class="srv" onclick="toast('Одежда — демо')"><span class="srv-ic" style="background:linear-gradient(180deg,#FFB45C,#F97B22)">👕</span>Одежда</button>
+      </div>
+
+      <!-- РЕШЕНИЕ: вместо горизонтального скролла «Можно забирать» и дубля заказов —
+           одна вертикальная карточка. Кнопка «Все заказы» видна сразу, возвраты — в 2 тапа -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Мои заказы</div>
+          <button class="link" onclick="toast('Раздел «Все заказы» — демо')">Все заказы <span class="chev">›</span></button>
+        </div>
+        <button class="order-row" onclick="toast('Заказ № 584 212 — демо')">
+          <span class="othumb" style="background:#EAF3FF">🧦</span>
+          <span class="ocol">
+            <span class="ostatus" style="color:var(--green)">Можно забрать</span>
+            <span class="osub">Пункт Ozon: ул. Щорса, 53 · до 24 окт, СБ</span>
+          </span>
+          <span class="chev">›</span>
+        </button>
+        <button class="order-row" onclick="toast('Заказ № 571 904 — демо')">
+          <span class="othumb" style="background:#FFF1E6">📦</span>
+          <span class="ocol">
+            <span class="ostatus" style="color:var(--blue)">В пути</span>
+            <span class="osub">Прибытие 27 окт · 2 товара</span>
+          </span>
+          <span class="chev">›</span>
+        </button>
+        <button class="order-row" onclick="go('returns')">
+          <span class="othumb" style="background:#F1F2F6">↩️</span>
+          <span class="ocol">
+            <span class="ostatus">Возвраты</span>
+            <span class="osub" id="ret-home-sub">2 активные заявки · деньги на счёте в Ozon Банке</span>
+          </span>
+          <span class="chev">›</span>
+        </button>
+      </div>
+
+      <!-- РЕШЕНИЕ: реклама стала тонкой полоской, а не баннером в пол-экрана -->
+      <button class="ad-mini" onclick="toast('Реклама: Ozon Селект — демо')">
+        <span class="ad-logo">SELECT</span>
+        <span class="ad-text">Комфортный трикотаж в новой подборке</span>
+        <span class="ad-tag">Реклама 17+</span>
+      </button>
+
+      <div class="section-row"><div class="card-title">Рекомендуем</div></div>
+      <div class="grid">
+        <div class="pcard">
+          <div class="pimg" style="background:linear-gradient(160deg,#D9EAFF,#F0F6FF)"><span class="pemoji">🧺</span>
+            <button class="heart" onclick="toggleHeart(this)"><svg viewBox="0 0 24 24"><path d="M12 20.5C7 16.6 3.5 13.4 3.5 9.6 3.5 7 5.5 5 8 5c1.6 0 3.1.9 4 2.2C12.9 5.9 14.4 5 16 5c2.5 0 4.5 2 4.5 4.6 0 3.8-3.5 7-8.5 10.9z"/></svg></button>
+          </div>
+          <div class="pbody"><div class="price">270 ₽ <s>320 ₽</s></div><div class="ptitle">Кондиционер для белья Lenor, 270 г</div><div class="prate">★ 4.9 · 2 318 оценок</div></div>
+        </div>
+        <div class="pcard">
+          <div class="pimg" style="background:linear-gradient(160deg,#E9F5E4,#F7FBF3)"><span class="pemoji">🍵</span>
+            <button class="heart" onclick="toggleHeart(this)"><svg viewBox="0 0 24 24"><path d="M12 20.5C7 16.6 3.5 13.4 3.5 9.6 3.5 7 5.5 5 8 5c1.6 0 3.1.9 4 2.2C12.9 5.9 14.4 5 16 5c2.5 0 4.5 2 4.5 4.6 0 3.8-3.5 7-8.5 10.9z"/></svg></button>
+          </div>
+          <div class="pbody"><div class="price">649 ₽</div><div class="ptitle">Botanitea Детокс — чай для очищения, 20 пак.</div><div class="prate">★ 4.7 · 856 оценок</div></div>
+        </div>
+        <div class="pcard">
+          <div class="pimg" style="background:linear-gradient(160deg,#ECECF1,#F8F8FA)"><span class="pemoji">👟</span>
+            <button class="heart" onclick="toggleHeart(this)"><svg viewBox="0 0 24 24"><path d="M12 20.5C7 16.6 3.5 13.4 3.5 9.6 3.5 7 5.5 5 8 5c1.6 0 3.1.9 4 2.2C12.9 5.9 14.4 5 16 5c2.5 0 4.5 2 4.5 4.6 0 3.8-3.5 7-8.5 10.9z"/></svg></button>
+          </div>
+          <div class="pbody"><div class="price">3 990 ₽ <s>5 490 ₽</s></div><div class="ptitle">Кроссовки демисезонные, унисекс</div><div class="prate">★ 4.8 · 12 402 оценки</div></div>
+        </div>
+        <div class="pcard">
+          <div class="pimg" style="background:linear-gradient(160deg,#FFE9D9,#FFF6EC)"><span class="pemoji">🧥</span>
+            <button class="heart" onclick="toggleHeart(this)"><svg viewBox="0 0 24 24"><path d="M12 20.5C7 16.6 3.5 13.4 3.5 9.6 3.5 7 5.5 5 8 5c1.6 0 3.1.9 4 2.2C12.9 5.9 14.4 5 16 5c2.5 0 4.5 2 4.5 4.6 0 3.8-3.5 7-8.5 10.9z"/></svg></button>
+          </div>
+          <div class="pbody"><div class="price">2 190 ₽</div><div class="ptitle">Худи оверсайз на флисе, унисекс</div><div class="prate">★ 4.6 · 703 оценки</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ПРОФИЛЬ ================= -->
+    <section class="screen" id="screen-profile">
+      <div class="prof-head">
+        <div class="avatar">Л</div>
+        <div class="prof-name"><b>Лиля З.</b><span>0 подписчиков · 4 подписки</span></div>
+        <button class="icon-btn" onclick="toast('Сообщения — демо')">
+          <svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 3.5V16H6.5A2.5 2.5 0 0 1 4 13.5z"/></svg>
+          <span class="dot-badge">10</span>
+        </button>
+        <button class="icon-btn" onclick="toast('Меню — демо')"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      </div>
+
+      <div class="quick-row">
+        <button class="quick" onclick="go('fav')">
+          <svg viewBox="0 0 24 24"><path d="M12 20.5C7 16.6 3.5 13.4 3.5 9.6 3.5 7 5.5 5 8 5c1.6 0 3.1.9 4 2.2C12.9 5.9 14.4 5 16 5c2.5 0 4.5 2 4.5 4.6 0 3.8-3.5 7-8.5 10.9z"/></svg>
+          <b>Избранное</b><span>413 товаров</span>
+        </button>
+        <button class="quick" onclick="toast('Список заказов объединён с главной — демо')">
+          <svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4z"/><path d="M4 7l8 4 8-4"/><path d="M12 11v10"/></svg>
+          <b>Покупки</b><span>Заказать снова</span>
+        </button>
+        <button class="quick" onclick="toast('Ждут отзыва — демо')">
+          <svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.7l5.9-.9L12 3.5z"/></svg>
+          <b>Ждут отзыва</b><span>159 товаров</span>
+        </button>
+      </div>
+
+      <!-- РЕШЕНИЕ: возвраты вынесены прямо в профиль — до них 2 тапа,
+           кнопка «Создать заявку» доступна без захода в список -->
+      <div class="card">
+        <button class="card-head" onclick="go('returns')">
+          <div class="card-title">Возвраты <span class="count-chip" id="ret-count">2</span></div>
+          <span class="chev">›</span>
+        </button>
+        <div class="osub" id="ret-prof-sub" style="margin:2px 0 12px">2 активные заявки · деньги на счёте в Ozon Банке</div>
+        <button class="btn-primary" onclick="openSheet()">+ Создать заявку на возврат</button>
+      </div>
+
+      <!-- Ozon Банк (6-я кнопка таббара) теперь живёт здесь -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Финансы</div>
+          <button class="balance" onclick="toast('Ozon Счёт: 400 ₽ — демо')">У вас 400 <span class="coin">O</span></button>
+        </div>
+        <div class="fin-grid">
+          <div class="fin-col">
+            <button class="fin-row" onclick="toast('Ozon Карта — демо')"><span>Ozon Карта</span><b>0 ₽</b></button>
+            <button class="fin-row" onclick="toast('Кредитная карта — демо')"><span>Кредитная карта</span><b>до 1 000 000 ₽</b></button>
+          </div>
+          <button class="fin-promo" onclick="toast('Накопления — демо')"><b>До 18,5% годовых</b><span>доход с цифровыми активами</span></button>
+        </div>
+      </div>
+
+      <div class="section-row"><div class="card-title">Вы смотрели</div></div>
+      <div class="hscroll">
+        <button class="seen-thumb" style="background:linear-gradient(160deg,#EDE3D6,#F8F1E8)" onclick="toast('Сумка — демо')">👜</button>
+        <button class="seen-thumb" style="background:linear-gradient(160deg,#E4E7EE,#F5F6F9)" onclick="toast('Портфель — демо')">💼</button>
+        <button class="seen-thumb" style="background:linear-gradient(160deg,#F0DEE6,#FAF0F4)" onclick="toast('Платье — демо')">👗</button>
+        <button class="seen-thumb" style="background:linear-gradient(160deg,#E3EAE2,#F2F7F2)" onclick="toast('Ботинки — демо')">👞</button>
+        <button class="seen-thumb" style="background:linear-gradient(160deg,#E4EDF3,#F4F9FC)" onclick="toast('Лосьон — демо')">🧴</button>
+      </div>
+    </section>
+
+    <!-- ================= ВОЗВРАТЫ ================= -->
+    <section class="screen" id="screen-returns">
+      <div class="fill">
+        <div class="page-head">
+          <button class="round-btn back" onclick="go('profile')">‹</button>
+          <div class="page-title">Возвраты</div>
+          <button class="round-btn q" onclick="toast('Как работают возвраты — демо')">?</button>
+        </div>
+
+        <div id="returns-list">
+          <div class="return-card">
+            <div class="rc-head"><b>Заявка от 1 сентября</b><span class="chev">›</span></div>
+            <span class="chip chip-green">Деньги отправлены</span>
+            <p>Вернули их на ваш счёт в Ozon Банке. Если деньги не пришли, напишите в <a>поддержку банка</a></p>
+            <div class="rthumb">👞</div>
+            <div class="rc-sum"><span>Сумма</span><b>1771,00 ₽</b></div>
+          </div>
+          <div class="return-card">
+            <div class="rc-head"><b>Заявка от 1 сентября</b><span class="chev">›</span></div>
+            <span class="chip chip-green">Деньги отправлены</span>
+            <p>Вернули их на ваш счёт в Ozon Банке. Если деньги не пришли, напишите в <a>поддержку банка</a></p>
+            <div class="rthumb">👗</div>
+            <div class="rc-sum"><span>Сумма</span><b>565,00 ₽</b></div>
+          </div>
+        </div>
+
+        <!-- Кнопка создания закреплена внизу: путь сократился с 5 шагов до 2 -->
+        <div class="create-bar">
+          <button class="btn-primary" onclick="openSheet()">+ Создать заявку на возврат</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ЗАГЛУШКИ ОСТАЛЬНЫХ ТАБОВ ============ -->
+    <section class="screen" id="screen-search">
+      <div class="stub">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/></svg>
+        <b>Поиск</b>
+        <span>В прототипе проработаны главная, профиль и возвраты. Популярные запросы:</span>
+        <div class="chip-tags">
+          <button class="chip-tag" onclick="toast('Поиск: «пуховик» — демо')">пуховик</button>
+          <button class="chip-tag" onclick="toast('Поиск: «iphone» — демо')">iphone</button>
+          <button class="chip-tag" onclick="toast('Поиск: «кофемолка» — демо')">кофемолка</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-fav">
+      <div class="stub">
+        <svg viewBox="0 0 24 24"><path d="M12 20.5C7 16.6 3.5 13.4 3.5 9.6 3.5 7 5.5 5 8 5c1.6 0 3.1.9 4 2.2C12.9 5.9 14.4 5 16 5c2.5 0 4.5 2 4.5 4.6 0 3.8-3.5 7-8.5 10.9z"/></svg>
+        <b>Избранное</b>
+        <span>413 товаров. Раздел-заглушка демонстрационного прототипа.</span>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-cart">
+      <div class="stub">
+        <span class="big">🛒</span>
+        <b>В корзине 80 товаров</b>
+        <span>Раздел-заглушка демонстрационного прототипа.</span>
+        <button class="btn-primary" onclick="toast('Оформление заказа — демо')">Оформить заказ</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ТАБ-БАР: 5 кнопок вместо 6 -->
+  <nav class="tabbar">
+    <button class="tab active" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1h-5v-6h-5v6h-5a1 1 0 0 1-1-1z"/></svg>
+      <span>Главная</span>
+    </button>
+    <button class="tab" data-tab="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.6-4.6"/></svg>
+      <span>Поиск</span>
+    </button>
+    <button class="tab" data-tab="fav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20.5C7 16.6 3.5 13.4 3.5 9.6 3.5 7 5.5 5 8 5c1.6 0 3.1.9 4 2.2C12.9 5.9 14.4 5 16 5c2.5 0 4.5 2 4.5 4.6 0 3.8-3.5 7-8.5 10.9z"/></svg>
+      <span>Избранное</span>
+    </button>
+    <button class="tab" data-tab="cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 4h2l2.3 10.4a1.8 1.8 0 0 0 1.8 1.4h7.6a1.8 1.8 0 0 0 1.8-1.4L20.5 8H6"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+      <span>Корзина</span>
+      <span class="badge">80</span>
+    </button>
+    <button class="tab" data-tab="profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c1.2-3.8 4.3-5.7 7.5-5.7s6.3 1.9 7.5 5.7"/></svg>
+      <span>Профиль</span>
+      <span class="badge">6</span>
+    </button>
+  </nav>
+
+  <!-- Шторка создания возврата -->
+  <div class="backdrop" id="backdrop" onclick="closeSheet()"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-grab"></div>
+    <div class="sheet-head"><b>Создать заявку на возврат</b><button class="x-btn" onclick="closeSheet()">✕</button></div>
+    <div class="sheet-sub">Выберите товар из ваших заказов</div>
+    <label class="pick">
+      <input type="radio" name="ret" checked data-name="Ботинки чёрные" data-price="1771,00 ₽">
+      <span class="rmark"></span><span class="pthmb">👞</span>
+      <span class="pcol"><b>Ботинки чёрные</b><small>Заказ от 12 сентября · 1771,00 ₽</small></span>
+    </label>
+    <label class="pick">
+      <input type="radio" name="ret" data-name="Платье трикотажное" data-price="565,00 ₽">
+      <span class="rmark"></span><span class="pthmb">👗</span>
+      <span class="pcol"><b>Платье трикотажное</b><small>Заказ от 12 сентября · 565,00 ₽</small></span>
+    </label>
+    <label class="pick">
+      <input type="radio" name="ret" data-name="Дозатор для мыла" data-price="223,00 ₽">
+      <span class="rmark"></span><span class="pthmb">🧴</span>
+      <span class="pcol"><b>Дозатор для мыла</b><small>Заказ от 3 октября · 223,00 ₽</small></span>
+    </label>
+    <button class="btn-primary" onclick="createReturn()">Продолжить</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+/* Навигация: возвраты — «push»-экран, поэтому подсвечен таб «Профиль» */
+function go(id){
+  $$('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-' + id));
+  const tabId = id === 'returns' ? 'profile' : id;
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
+  if(id !== 'returns') closeSheet();
+}
+ $$('.tab').forEach(t => t.addEventListener('click', () => go(t.dataset.tab)));
+
+/* Тосты вместо реальных переходов */
+let toastTimer;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* Лайки */
+function toggleHeart(btn){ btn.classList.toggle('on'); }
+
+/* Шторка возврата */
+function openSheet(){ $('#backdrop').classList.add('show'); $('#sheet').classList.add('open'); }
+function closeSheet(){ $('#backdrop').classList.remove('show'); $('#sheet').classList.remove('open'); }
+
+function pluralReq(n){
+  const a = n % 10, b = n % 100;
+  if(a === 1 && b !== 11) return 'активная заявка';
+  if(a >= 2 && a <= 4 && (b < 10 || b >= 20)) return 'активные заявки';
+  return 'активных заявок';
+}
+
+/* Создание возврата: заявка реально появляется в списке, счётчики обновляются */
+function createReturn(){
+  const checked = document.querySelector('.pick input:checked');
+  const name  = checked.dataset.name;
+  const price = checked.dataset.price;
+  const list  = $('#returns-list');
+  const time  = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+
+  const card = document.createElement('div');
+  card.className = 'return-card';
+  card.innerHTML = `
+    <div class="rc-head"><b>Заявка от сегодня, ${time}</b><span class="chev">›</span></div>
+    <span class="chip chip-blue">Создана · ждёт продавца</span>
+    <p>Заявка на возврат товара «${name}» создана. После проверки продавцом деньги вернутся на счёт в Ozon Банке.</p>
+    <div class="rc-sum"><span>Сумма возврата</span><b>${price}</b></div>`;
+  list.prepend(card);
+
+  const n = list.children.length;
+  const sub = `${n} ${pluralReq(n)} · деньги на счёте в Ozon Банке`;
+  $('#ret-count').textContent = n;
+  $('#ret-home-sub').textContent = sub;
+  $('#ret-prof-sub').textContent = sub;
+
+  closeSheet();
+  $('#screen-returns').scrollTop = 0;
+  toast('Заявка на возврат создана ✔');
+}
+
+/* Масштабирование макета iPhone 16 Pro (402×874 pt) под размер окна */
+const phone = $('#phone'), holder = $('#holder');
+function fit(){
+  const s = Math.min(1, (innerHeight - 20) / 874, (innerWidth - 20) / 402);
+  phone.style.transform = `scale(${s})`;
+  holder.style.width  = 402 * s + 'px';
+  holder.style.height = 874 * s + 'px';
+}
+addEventListener('resize', fit);
+fit();
+</script>
+</body>
+</html>
